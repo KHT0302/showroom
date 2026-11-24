@@ -142,6 +142,32 @@
 
   footer{margin-top:46px;text-align:center;font-size:12px;color:var(--sub);line-height:1.7}
 
+  /* ---------- 배경음악 미니 플레이어 ---------- */
+  .player{position:fixed;left:50%;transform:translateX(-50%);z-index:20;
+    bottom:calc(86px + env(safe-area-inset-bottom));width:min(500px,calc(100% - 28px));
+    background:var(--bar);backdrop-filter:blur(22px) saturate(1.6);-webkit-backdrop-filter:blur(22px) saturate(1.6);
+    border:1px solid var(--barLine);border-radius:18px;padding:8px 10px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+  .player .ph{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--sub);padding:0 2px 6px}
+  .player .ph b{color:var(--ink);font-weight:800}
+  .player .eq{display:inline-flex;gap:2px;align-items:flex-end;height:12px}
+  .player .eq i{width:3px;background:var(--blue);border-radius:2px;height:4px;animation:eq 1s infinite ease-in-out}
+  .player .eq i:nth-child(2){animation-delay:.2s}.player .eq i:nth-child(3){animation-delay:.4s}
+  .player.paused .eq i{animation:none;height:4px}
+  @keyframes eq{0%,100%{height:3px}50%{height:12px}}
+  .player .nx{margin-left:auto;border:none;background:var(--btn);color:var(--blue);font:800 12px inherit;font-family:inherit;border-radius:999px;padding:4px 10px;cursor:pointer}
+  .player iframe{display:block;width:100%;height:20px;border:0;border-radius:4px}
+  body.has-player .wrap{padding-bottom:200px}
+
+  /* ---------- 앱 미리보기 화면 (음악이 끊기지 않게 페이지 안에서 열기) ---------- */
+  .viewer{position:fixed;inset:0;z-index:15;background:var(--bg);display:none;flex-direction:column}
+  .viewer.on{display:flex}
+  .vbar{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;border-bottom:1px solid var(--line);background:var(--bg)}
+  .vbar .back{border:none;background:none;color:var(--blue);font:700 16px inherit;font-family:inherit;cursor:pointer;padding:4px 2px;white-space:nowrap}
+  .vbar .vt{flex:1;min-width:0;text-align:center;font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .vbar .ext{color:var(--sub);font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap}
+  .viewer iframe{flex:1;width:100%;border:0;background:#fff}
+  body.has-player .viewer iframe{margin-bottom:calc(64px + env(safe-area-inset-bottom))}
+
   /* ---------- 하단 탭바 (떠 있는 유리 탭바) ---------- */
   .tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:5;
     width:min(500px,calc(100% - 28px));background:var(--bar);backdrop-filter:blur(22px) saturate(1.6);-webkit-backdrop-filter:blur(22px) saturate(1.6);
@@ -258,6 +284,14 @@
 </nav></div>
 
 <div class="dim" id="dim"></div>
+<div class="viewer" id="viewer">
+  <div class="vbar"><button class="back" id="vBack">‹ APP STORE</button><div class="vt" id="vTitle"></div><a class="ext" id="vExt" target="_blank" rel="noopener">새 창 ↗</a></div>
+  <iframe id="vFrame" title="앱 미리보기" allow="fullscreen; autoplay"></iframe>
+</div>
+<div class="player paused" id="player" hidden>
+  <div class="ph"><span class="eq"><i></i><i></i><i></i></span><span id="pTitle">▶ 눌러서 음악 켜기</span><button class="nx" id="pNext">다음 곡 ›</button></div>
+  <iframe id="scw" allow="autoplay" title="배경음악"></iframe>
+</div>
 <div class="sheet" id="sheet"></div>
 
 <script>
@@ -302,7 +336,7 @@ const APPS = [
   { id:'board',     cat:'league', dev:'kim',  name:'BSPN 전광판',           desc:'라이브 스코어보드 (PM2026)',
     mode:'get', link:'', users:'', grade:'', devTime:'', shots:[], prompt:'', versions:[] },
   { id:'bleague',   cat:'league', dev:'kim',  name:'BONGSAN LEAGUE',        desc:'학생 안내 앱 · 일정·결과·득점 순위·대진표',
-    mode:'get', link:'https://bspn-crew.kht920302.chatgpt.site/bongsan-league?tab=results', users:'', grade:'', devTime:'', shots:[], prompt:'', versions:[] },
+    mode:'get', link:'https://bspn-crew.kht920302.chatgpt.site/bongsan-league?tab=results', frame:false, users:'', grade:'', devTime:'', shots:[], prompt:'', versions:[] },
   { id:'futsal',    cat:'league', dev:'jung', name:'SDSMP',                 desc:'풋살 리그 · SD 스포츠 매니지먼트 플랫폼',
     mode:'get', link:'apps/sdsmp.html', cap:'둘러보기', users:'', grade:'', devTime:'', shots:[], prompt:'', versions:[] },
 
@@ -571,12 +605,62 @@ function storyDetail(key){
     ${s.body.map(p=>`<p>${p}</p>`).join('')}${photos}</div>`;
 }
 
+/* ===================== 배경음악 =====================
+   사운드클라우드 주소를 넣으면 화면 아래 플레이어가 생깁니다.
+   - 재생목록(세트) 주소 하나를 넣으면 그 순서대로 계속 재생 (가장 안정적)
+   - 곡 주소 여러 개를 넣으면 한 곡이 끝날 때 다음 곡으로 넘어가고, 마지막 곡 다음엔 처음으로 */
+const MUSIC = [
+  // 'https://soundcloud.com/.../sets/...',
+];
+
 function act(id){
   const a = APPS.find(x=>x.id===id);
   if(!a) return;
-  if(a.mode==='get' && a.link){ window.open(a.link,'_blank'); return; }
+  if(a.mode==='get' && a.link){ openViewer(a); return; }
   openSheet(appDetail(a));
 }
+
+/* 앱은 같은 페이지 안에서 열어서 음악이 끊기지 않게 함 (frame:false 인 앱만 새 창) */
+function openViewer(a){
+  if(a.frame===false){ window.open(a.link,'_blank'); return; }
+  closeSheet();
+  $('#vTitle').textContent = a.name;
+  $('#vExt').href = a.link;
+  $('#vFrame').src = a.link;
+  $('#viewer').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function closeViewer(){
+  $('#viewer').classList.remove('on');
+  $('#vFrame').src = 'about:blank';
+  document.body.style.overflow='';
+}
+document.getElementById('vBack').addEventListener('click', closeViewer);
+
+(function initMusic(){
+  if(!MUSIC.length) return;
+  const box = $('#player'), ifr = $('#scw');
+  box.hidden = false; document.body.classList.add('has-player');
+  const opts = '&color=%23007aff&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=false';
+  let i = 0;
+  ifr.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(MUSIC[0]) + opts;
+  const sc = document.createElement('script');
+  sc.src = 'https://w.soundcloud.com/player/api.js';
+  sc.onload = () => {
+    const w = SC.Widget(ifr), E = SC.Widget.Events;
+    const title = () => w.getCurrentSound(s => { if(s) $('#pTitle').innerHTML = '<b>' + (s.title||'') + '</b>'; });
+    const next = () => {
+      if(MUSIC.length > 1){ i = (i+1) % MUSIC.length; w.load(MUSIC[i], {auto_play:true, show_user:true, visual:false, color:'#007aff'}); }
+      else { w.skip ? w.next() : w.seekTo(0); }
+    };
+    w.bind(E.READY, title);
+    w.bind(E.PLAY, () => { box.classList.remove('paused'); title(); });
+    w.bind(E.PAUSE, () => box.classList.add('paused'));
+    w.bind(E.FINISH, () => { if(MUSIC.length > 1) next(); else w.getSounds(ss => { w.getCurrentSoundIndex(k => { if(k >= ss.length-1){ w.skip(0); w.play(); } }); }); });
+    $('#pNext').addEventListener('click', () => { MUSIC.length > 1 ? next() : w.next(); });
+  };
+  document.head.appendChild(sc);
+})();
 
 document.addEventListener('click', e=>{
   const btn = e.target.closest('[data-act]');
