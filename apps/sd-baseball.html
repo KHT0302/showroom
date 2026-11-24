@@ -1,6 +1,35 @@
 <!doctype html>
 <html lang="ko">
 <head>
+<script>
+/* 쇼룸 종료: 2026-11-27 00:00(한국시간)부터 종료 화면만 보임. 미리보기: 주소 뒤에 ?closed */
+(function(){
+  var END = Date.parse('2026-11-27T00:00:00+09:00');
+  var force = /[?&]closed\b/.test(location.search);
+  if (!(force || Date.now() >= END)) return;
+  var css = 'html,body{margin:0;height:100%;background:#EFE8DC!important;overflow:hidden!important}'
+    + 'body>*:not(#closedScreen){display:none!important}'
+    + '#closedScreen{position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;padding:32px;background:#EFE8DC;color:#2B2620;font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif;letter-spacing:-0.01em}'
+    + '#closedScreen .k{font-size:14px;font-weight:700;color:#1f7ae0}'
+    + '#closedScreen h1{margin:0;font-size:40px;font-weight:900;letter-spacing:-0.03em;line-height:1}'
+    + '#closedScreen .r{width:44px;height:1px;background:#C9BEAD}'
+    + '#closedScreen .m{margin:0;font-size:19px;font-weight:700}'
+    + '#closedScreen .s{margin:0;font-size:14px;line-height:1.8;color:#8A7F70}';
+  var st = document.createElement('style'); st.textContent = css;
+  document.head ? document.head.appendChild(st) : document.documentElement.appendChild(st);
+  function show(){
+    if (document.getElementById('closedScreen')) return;
+    var d = document.createElement('div'); d.id = 'closedScreen';
+    d.innerHTML = '<div class="k">광주, 체육의 흐름을 바꾸다</div><h1>APP STORE</h1><div class="r"></div>'
+      + '<p class="m">쇼룸이 종료되었습니다</p>'
+      + '<p class="s">2026 K-교육특별시 수업나눔페스타<br>방문해 주셔서 감사합니다</p>';
+    document.body.appendChild(d);
+  }
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show);
+  window.addEventListener('load', show);
+})();
+</script>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>2026 SD BASEBALL LEAGUE</title>
