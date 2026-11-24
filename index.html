@@ -610,7 +610,7 @@ function storyDetail(key){
    - 재생목록(세트) 주소 하나를 넣으면 그 순서대로 계속 재생 (가장 안정적)
    - 곡 주소 여러 개를 넣으면 한 곡이 끝날 때 다음 곡으로 넘어가고, 마지막 곡 다음엔 처음으로 */
 const MUSIC = [
-  // 'https://soundcloud.com/.../sets/...',
+  'https://soundcloud.com/illowy/newjeans-house-remix-mixset',
 ];
 
 function act(id){
@@ -656,7 +656,14 @@ document.getElementById('vBack').addEventListener('click', closeViewer);
     w.bind(E.READY, title);
     w.bind(E.PLAY, () => { box.classList.remove('paused'); title(); });
     w.bind(E.PAUSE, () => box.classList.add('paused'));
-    w.bind(E.FINISH, () => { if(MUSIC.length > 1) next(); else w.getSounds(ss => { w.getCurrentSoundIndex(k => { if(k >= ss.length-1){ w.skip(0); w.play(); } }); }); });
+    w.bind(E.FINISH, () => {
+      if(MUSIC.length > 1) { next(); return; }
+      w.getSounds(ss => {
+        if(ss && ss.length > 1){ w.getCurrentSoundIndex(k => { if(k >= ss.length-1){ w.skip(0); } }); }
+        else { w.seekTo(0); w.play(); }   /* 한 곡(믹스셋)이면 처음부터 다시 */
+      });
+    });
+    w.bind(E.READY, () => w.getSounds(ss => { if(MUSIC.length < 2 && (!ss || ss.length < 2)) $('#pNext').hidden = true; }));
     $('#pNext').addEventListener('click', () => { MUSIC.length > 1 ? next() : w.next(); });
   };
   document.head.appendChild(sc);
