@@ -135,6 +135,9 @@
   .devs{display:flex;flex-direction:column;gap:12px;padding:6px 20px}
   .devs::-webkit-scrollbar{display:none}
   .devcard{background:var(--elev);border-radius:20px;padding:18px;cursor:pointer;display:flex;gap:16px;align-items:flex-start}
+  .devcard[style*="--tn"]{background:linear-gradient(135deg,rgba(var(--tn),.20),rgba(var(--tn),.06) 70%),var(--elev)}
+  .devcard[style*="--tn"] .school{color:rgb(var(--tn))}
+  .devcard[style*="--tn"] .dph{box-shadow:0 0 0 3px rgba(var(--tn),.45)}
   .devcard .dph{flex:none;width:64px;height:64px;border-radius:50%;object-fit:cover;background:#e8e1d5;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
   .devcard .dinfo{flex:1;min-width:0}
   .devcard .apps:empty{display:none}
@@ -325,10 +328,10 @@
    ========================================================= */
 
 const DEVS = {
-  kim:  { school:'봉산중학교', name:'김현태', photo:'img/dev-kim.jpg' },
-  jung: { school:'성덕중학교', name:'정승현', photo:'img/dev-jung.jpg' },
-  lee:  { school:'성덕중학교', name:'이희권', photo:'img/dev-lee.jpg' },
-  moon: { school:'수완중학교', name:'문건후', photo:'img/dev-moon.jpg' },
+  kim:  { school:'봉산중학교', name:'김현태', photo:'img/dev-kim.jpg',  tone:'31,122,224' },
+  jung: { school:'성덕중학교', name:'정승현', photo:'img/dev-jung.jpg', tone:'240,120,40' },
+  lee:  { school:'성덕중학교', name:'이희권', photo:'img/dev-lee.jpg',  tone:'30,150,90' },
+  moon: { school:'수완중학교', name:'문건후', photo:'img/dev-moon.jpg', tone:'130,80,220' },
 };
 
 /* 우리의 모티브 */
@@ -546,7 +549,8 @@ function renderShelves(){
 
   $('#devs').innerHTML = Object.entries(DEVS).map(([k,d])=>{
     const mine = APPS.filter(a=>a.dev===k);
-    return `<div class="devcard" data-dev="${k}">
+    const tn = d.tone ? ` style="--tn:${d.tone}"` : '';
+    return `<div class="devcard" data-dev="${k}"${tn}>
       ${d.photo?`<img class="dph" src="${d.photo}" alt="${d.name} 선생님">`:''}
       <div class="dinfo">
       <div class="school">${d.school}</div>
