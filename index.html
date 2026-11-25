@@ -719,8 +719,8 @@ window.addEventListener('popstate', ()=>{ closeViewer(); });
     if(!au.paused){ wantOn = false; save('off'); au.pause(); }
     else { wantOn = true; save('on'); tryPlay(); }
   });
-  /* 앱 화면이 열려 있어도 음악은 계속, 탭을 떠나면 잠시 멈춤 */
-  document.addEventListener('visibilitychange', () => { if(document.hidden) au.pause(); else tryPlay(); });
+  /* 새 창 앱으로 가도 끄지 않음 (브라우저가 멈추면 돌아왔을 때 다시 재생) */
+  document.addEventListener('visibilitychange', () => { if(!document.hidden) tryPlay(); });
 })();
 
 document.addEventListener('click', e=>{
