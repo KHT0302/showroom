@@ -699,7 +699,7 @@ window.addEventListener('popstate', ()=>{ closeViewer(); });
   if(!MUSIC.length) return;
   const btn = $('#mbtn'), pop = $('#mpop');
   btn.hidden = false;
-  const au = new Audio(MUSIC[0]); au.loop = true; au.preload = 'auto'; au.volume = .7;
+  const au = new Audio(MUSIC[0]); au.loop = true; au.preload = 'auto'; au.volume = .55;
   let wantOn = true;
   try { if(sessionStorage.getItem('bgm') === 'off') wantOn = false; } catch(e){}
   const save = v => { try { sessionStorage.setItem('bgm', v); } catch(e){} };
