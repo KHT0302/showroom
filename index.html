@@ -21,7 +21,7 @@
     if (document.getElementById('closedScreen')) return;
     var d = document.createElement('div'); d.id = 'closedScreen';
     d.innerHTML = '<div class="k">광주, 체육의 흐름을 바꾸다</div><h1>APP STORE</h1><div class="r"></div>'
-      + '<p class="m">쇼룸이 종료되었습니다</p>'
+      + '<p class="m">쇼룸은 11월 27일 오전에 종료되었습니다</p>'
       + '<p class="s">2026 K-교육특별시 수업나눔페스타<br>방문해 주셔서 감사합니다</p>';
     document.body.appendChild(d);
   }
@@ -311,7 +311,6 @@
   <path class="slash" d="M6 6 26 26" stroke="#ff3b30" stroke-width="2.6" stroke-linecap="round"/></svg>
 </button>
 <div class="mpop" id="mpop" hidden><p>이 기기에서는 처음 한 번만 ▶를 눌러주세요</p></div>
-<iframe id="scw" allow="autoplay" title="배경음악" tabindex="-1" aria-hidden="true"></iframe>
 <div class="sheet" id="sheet"></div>
 
 <script>
@@ -652,12 +651,8 @@ function storyDetail(key){
 }
 
 /* ===================== 배경음악 =====================
-   사운드클라우드 주소를 넣으면 화면 아래 플레이어가 생깁니다.
-   - 재생목록(세트) 주소 하나를 넣으면 그 순서대로 계속 재생 (가장 안정적)
-   - 곡 주소 여러 개를 넣으면 한 곡이 끝날 때 다음 곡으로 넘어가고, 마지막 곡 다음엔 처음으로 */
-const MUSIC = [
-  'https://soundcloud.com/illowy/newjeans-house-remix-mixset',
-];
+   music/mix.mp3 (세 곡을 끊김 없이 이어 붙인 믹스) 를 계속 반복 재생 */
+const MUSIC = ['music/mix.mp3'];
 
 function act(id){
   const a = APPS.find(x=>x.id===id);
@@ -702,54 +697,30 @@ window.addEventListener('popstate', ()=>{ closeViewer(); });
 
 (function initMusic(){
   if(!MUSIC.length) return;
-  const btn = $('#mbtn'), pop = $('#mpop'), ifr = $('#scw');
+  const btn = $('#mbtn'), pop = $('#mpop');
   btn.hidden = false;
-  const opts = '&color=%23007aff&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&visual=false';
-  let i = 0, playing = false, wantOn = true, w = null, tried = false;
+  const au = new Audio(MUSIC[0]); au.loop = true; au.preload = 'auto'; au.volume = .7;
+  let wantOn = true;
   try { if(sessionStorage.getItem('bgm') === 'off') wantOn = false; } catch(e){}
-  ifr.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(MUSIC[0]) + opts;
-
-  const setUI = () => { btn.classList.toggle('on', playing); btn.classList.toggle('off', !playing); };
   const save = v => { try { sessionStorage.setItem('bgm', v); } catch(e){} };
-
-  /* 자동재생이 막힌 기기(아이폰 등)면 작은 창에 사운드클라우드 버튼을 보여줌 */
-  const fallback = () => { if(playing || !wantOn) return; pop.appendChild(ifr); pop.hidden = false; };
-  const tryPlay = () => {
-    if(!w || !wantOn || playing) return;
-    w.setVolume && w.setVolume(70);
-    w.play(); tried = true;
-    setTimeout(fallback, 1800);
-  };
-
-  const sc = document.createElement('script');
-  sc.src = 'https://w.soundcloud.com/player/api.js';
-  sc.onload = () => {
-    w = SC.Widget(ifr); const E = SC.Widget.Events;
-    w.bind(E.READY, () => { if(wantOn) tryPlay(); });
-    w.bind(E.PLAY, () => { playing = true; setUI(); pop.hidden = true; if(ifr.parentNode === pop) document.body.appendChild(ifr); });
-    w.bind(E.PAUSE, () => { playing = false; setUI(); });
-    w.bind(E.FINISH, () => {
-      if(MUSIC.length > 1){ i = (i+1) % MUSIC.length; w.load(MUSIC[i], {auto_play:true, visual:false, show_user:false}); return; }
-      w.getSounds(ss => {
-        if(ss && ss.length > 1){ w.getCurrentSoundIndex(k => { if(k >= ss.length-1) w.skip(0); }); }
-        else { w.seekTo(0); w.play(); }
-      });
-    });
-  };
-  document.head.appendChild(sc);
-
-  /* 첫 터치·클릭 때 자동으로 시작 (브라우저가 소리 자동재생을 막기 때문) */
+  const setUI = () => { const on = !au.paused; btn.classList.toggle('on', on); btn.classList.toggle('off', !on); };
+  au.addEventListener('play', setUI); au.addEventListener('pause', setUI);
+  const tryPlay = () => { if(!wantOn || !au.paused) return; const p = au.play(); if(p && p.catch) p.catch(()=>{}); };
+  /* 들어오자마자 한 번 시도, 막히면 화면 첫 터치·클릭 때 시작 */
+  tryPlay();
+  const evs = ['pointerdown','touchend','click','keydown'];
   const first = e => {
-    if(e.target.closest && e.target.closest('#mbtn')) return;
-    document.removeEventListener('pointerdown', first, true);
+    if(e.target && e.target.closest && e.target.closest('#mbtn')) return;
     tryPlay();
+    if(!au.paused) evs.forEach(t => document.removeEventListener(t, first, true));
   };
-  document.addEventListener('pointerdown', first, true);
-
+  evs.forEach(t => document.addEventListener(t, first, true));
   btn.addEventListener('click', () => {
-    if(playing){ wantOn = false; save('off'); w && w.pause(); pop.hidden = true; }
-    else { wantOn = true; save('on'); if(w){ w.play(); setTimeout(fallback, 1800); } }
+    if(!au.paused){ wantOn = false; save('off'); au.pause(); }
+    else { wantOn = true; save('on'); tryPlay(); }
   });
+  /* 앱 화면이 열려 있어도 음악은 계속, 탭을 떠나면 잠시 멈춤 */
+  document.addEventListener('visibilitychange', () => { if(document.hidden) au.pause(); else tryPlay(); });
 })();
 
 document.addEventListener('click', e=>{
