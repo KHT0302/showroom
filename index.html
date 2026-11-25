@@ -97,6 +97,7 @@
   .meta .desc{font-size:14px;color:var(--sub);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .meta .by{display:flex;align-items:center;gap:5px;margin-top:4px;font-size:12px;font-weight:600;color:var(--sub);white-space:nowrap;overflow:hidden}
   .meta .by .sch{background:var(--btn);color:var(--blue);font-weight:800;font-size:11px;padding:2px 7px;border-radius:6px}
+  .meta .by .sch[style*="--tn"]{background:rgba(var(--tn),.16);color:rgb(var(--tn))}
 
   /* 앱 아이콘 */
   .icon{flex:0 0 auto;width:66px;height:66px;border-radius:16px;position:relative;overflow:hidden;
@@ -135,9 +136,6 @@
   .devs{display:flex;flex-direction:column;gap:12px;padding:6px 20px}
   .devs::-webkit-scrollbar{display:none}
   .devcard{background:var(--elev);border-radius:20px;padding:18px;cursor:pointer;display:flex;gap:16px;align-items:flex-start}
-  .devcard[style*="--tn"]{background:linear-gradient(135deg,rgba(var(--tn),.20),rgba(var(--tn),.06) 70%),var(--elev)}
-  .devcard[style*="--tn"] .school{color:rgb(var(--tn))}
-  .devcard[style*="--tn"] .dph{box-shadow:0 0 0 3px rgba(var(--tn),.45)}
   .devcard .dph{flex:none;width:64px;height:64px;border-radius:50%;object-fit:cover;background:#e8e1d5;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
   .devcard .dinfo{flex:1;min-width:0}
   .devcard .apps:empty{display:none}
@@ -529,7 +527,7 @@ function rowHTML(a, isLast, withBtn=true){
     ${iconHTML(a.id)}
     <div class="rbody">
       <div class="meta"><div class="name">${a.name}</div><div class="desc">${a.desc}</div>
-        <div class="by"><span class="sch">${(DEVS[a.dev]||{}).school?.replace('학교','')||''}</span>${(DEVS[a.dev]||{}).name||''} 선생님</div></div>
+        <div class="by"><span class="sch"${(DEVS[a.dev]||{}).tone?` style="--tn:${DEVS[a.dev].tone}"`:''}>${(DEVS[a.dev]||{}).school?.replace('학교','')||''}</span>${(DEVS[a.dev]||{}).name||''} 선생님</div></div>
       ${withBtn?`<div class="getw"><button class="btn ${b.cls}" data-act="${a.id}">${b.label}</button>${b.cap?`<small>${b.cap}</small>`:''}</div>`:''}
     </div>
   </div>`;
@@ -549,8 +547,7 @@ function renderShelves(){
 
   $('#devs').innerHTML = Object.entries(DEVS).map(([k,d])=>{
     const mine = APPS.filter(a=>a.dev===k);
-    const tn = d.tone ? ` style="--tn:${d.tone}"` : '';
-    return `<div class="devcard" data-dev="${k}"${tn}>
+    return `<div class="devcard" data-dev="${k}">
       ${d.photo?`<img class="dph" src="${d.photo}" alt="${d.name} 선생님">`:''}
       <div class="dinfo">
       <div class="school">${d.school}</div>
