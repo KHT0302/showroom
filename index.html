@@ -134,7 +134,17 @@
   /* 개발자 */
   .devs{display:flex;flex-direction:column;gap:12px;padding:6px 20px}
   .devs::-webkit-scrollbar{display:none}
-  .devcard{background:var(--elev);border-radius:20px;padding:18px;cursor:pointer}
+  .devcard{background:var(--elev);border-radius:20px;padding:18px;cursor:pointer;display:flex;gap:16px;align-items:flex-start}
+  .devcard .dph{flex:none;width:64px;height:64px;border-radius:50%;object-fit:cover;background:#e8e1d5;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
+  .devcard .dinfo{flex:1;min-width:0}
+  .devcard .apps:empty{display:none}
+  .motive{margin:6px 20px 16px;padding:26px 22px;border-radius:20px;background:var(--elev);text-align:center}
+  .motive .k{font-size:12px;font-weight:800;color:#a0845c;letter-spacing:.04em}
+  .motive h4{font-size:22px;font-weight:900;letter-spacing:-.02em;margin-top:6px}
+  .motive .ln{width:32px;height:1px;background:#C9BEAD;margin:14px auto}
+  .motive p{font-size:15px;line-height:1.75;color:var(--sub)}
+  .motive p+p{margin-top:10px}
+  .story .dph-l{width:96px;height:96px;border-radius:50%;object-fit:cover;display:block;margin-bottom:12px}
   .devcard .school{font-size:12px;font-weight:700;color:var(--blue)}
   .devcard .who{font-size:20px;font-weight:800;margin-top:2px}
   .devcard .apps{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
@@ -270,6 +280,7 @@
 
   <section class="shelfsec" id="developers">
     <div class="sh"><h3>개발자 <span class="chev">›</span></h3><p>앱을 만든 체육 선생님들</p></div>
+    <div class="motive" id="motive"></div>
     <div class="devs" id="devs"></div>
   </section>
 
@@ -311,9 +322,17 @@
    ========================================================= */
 
 const DEVS = {
-  lee:  { school:'성덕중학교', name:'이희권' },
-  jung: { school:'성덕중학교', name:'정승현' },
-  kim:  { school:'봉산중학교', name:'김현태' },
+  kim:  { school:'봉산중학교', name:'김현태', photo:'img/dev-kim.jpg' },
+  jung: { school:'성덕중학교', name:'정승현', photo:'img/dev-jung.jpg' },
+  lee:  { school:'성덕중학교', name:'이희권', photo:'img/dev-lee.jpg' },
+  moon: { school:'수완중학교', name:'문건후', photo:'img/dev-moon.jpg' },
+};
+
+/* 우리의 모티브 */
+const MOTIVE = {
+  title:'체육은 움직여야 한다',
+  body:['움직임을 대신하는 AI가 아니라,<br>학생들이 더 움직이고 더 즐거워할 수 있게<br>힘을 보태는 AI.',
+        '그런 AI 시스템의 바탕을 만드는 것이<br>우리의 목표입니다.'],
 };
 
 const CATEGORIES = [
@@ -357,9 +376,9 @@ const APPS = [
 /* 2027 출시 예정 앱 — 이름이 비어 있으면 '준비 중' 카드
    dev: ['kim'] 처럼 위 DEVS 키 / features: 들어갈 기능 목록 */
 const UPCOMING = [
-  { id:'up1', bg:'linear-gradient(150deg,#1b3fd1,#4f8dff 60%,#7cc8ff)', name:'', desc:'', dev:[], when:'2027', features:[] },
-  { id:'up2', bg:'linear-gradient(150deg,#5a1fd1,#9b5cff 60%,#d59bff)', name:'', desc:'', dev:[], when:'2027', features:[] },
-  { id:'up3', bg:'linear-gradient(150deg,#d1361f,#ff7a4f 60%,#ffc27c)', name:'', desc:'', dev:[], when:'2027', features:[] },
+  { id:'up1', bg:'linear-gradient(150deg,#1b3fd1,#4f8dff 60%,#7cc8ff)', name:'티볼 게임 시스템', desc:'소수인원 학교를 위한 티볼 게임 시스템', dev:[], when:'2027', features:['소수인원 학교 맞춤 티볼 게임'] },
+  { id:'up2', bg:'linear-gradient(150deg,#5a1fd1,#9b5cff 60%,#d59bff)', name:'입시 실기 측정 시스템', desc:'대입 입시 실기 측정 + 성장 측정 프로그램', dev:[], when:'2027', features:['대입 입시 실기 측정','성장 측정 프로그램'] },
+  { id:'up3', bg:'linear-gradient(150deg,#d1361f,#ff7a4f 60%,#ffc27c)', name:'심박수 · GPS 활동 시스템', desc:'심박수와 GPS 기반 활동 시스템', dev:[], when:'2027', features:['심박수 기반 활동 기록','GPS 기반 활동 기록'] },
 ];
 
 const STORY = {
@@ -511,12 +530,16 @@ function renderShelves(){
   $('#devs').innerHTML = Object.entries(DEVS).map(([k,d])=>{
     const mine = APPS.filter(a=>a.dev===k);
     return `<div class="devcard" data-dev="${k}">
+      ${d.photo?`<img class="dph" src="${d.photo}" alt="${d.name} 선생님">`:''}
+      <div class="dinfo">
       <div class="school">${d.school}</div>
       <div class="who">${d.name} 선생님</div>
       <div class="apps">${mine.map(a=>iconHTML(a.id,'xs')).join('')}</div>
-      <div class="cnt">앱 ${mine.length}개</div>
+      <div class="cnt">${mine.length?`앱 ${mine.length}개`:'2027 앱 준비 중'}</div>
+      </div>
     </div>`;
   }).join('');
+  $('#motive').innerHTML = `<div class="k">OUR MOTIVE</div><h4>${MOTIVE.title}</h4><div class="ln"></div>${MOTIVE.body.map(t=>`<p>${t}</p>`).join('')}`;
 
   $('#ups').innerHTML = UPCOMING.map(u=>{
     const tbd = !u.name;
@@ -599,7 +622,7 @@ function upDetail(u){
 
 function devDetail(k){
   const d = DEVS[k], mine = APPS.filter(a=>a.dev===k);
-  return `<div class="story"><div class="tag" style="color:var(--blue)">${d.school}</div><h2>${d.name} 선생님</h2></div>
+  return `<div class="story">${d.photo?`<img class="dph-l" src="${d.photo}" alt="">`:''}<div class="tag" style="color:var(--blue)">${d.school}</div><h2>${d.name} 선생님</h2></div>
     <div class="d-sec">${mine.map((a,i)=>rowHTML(a,i===mine.length-1)).join('')}</div>`;
 }
 
