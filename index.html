@@ -174,11 +174,15 @@
   /* ---------- 앱 미리보기 화면 (음악이 끊기지 않게 페이지 안에서 열기) ---------- */
   .viewer{position:fixed;inset:0;z-index:15;background:var(--bg);display:none;flex-direction:column}
   .viewer.on{display:flex}
-  .vbar{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;border-bottom:1px solid var(--line);background:var(--bg)}
-  .vbar .back{border:none;background:none;color:var(--blue);font:700 16px inherit;font-family:inherit;cursor:pointer;padding:4px 2px;white-space:nowrap}
-  .vbar .vt{flex:1;min-width:0;text-align:center;font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .vbar .ext{color:var(--sub);font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap}
-  .viewer iframe{flex:1;width:100%;border:0;background:#fff}
+  .viewer{will-change:transform}
+  .vbar{flex:0 0 auto;display:flex;align-items:center;gap:10px;min-height:64px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;border-bottom:1px solid var(--line);background:var(--bg)}
+  .vbar .back{border:none;background:var(--elev);color:var(--blue);font-family:inherit;font-size:17px;font-weight:800;cursor:pointer;min-height:44px;padding:0 18px 0 14px;border-radius:999px;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+  .vbar .back:active{opacity:.6}
+  .vbar .vt{flex:1;min-width:0;text-align:center;font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .vbar .ext{color:var(--sub);font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;padding:12px 4px}
+  .vbody{flex:1;position:relative;display:flex;min-height:0}
+  .vedge{position:absolute;left:0;top:0;bottom:0;width:24px;z-index:2;touch-action:none}
+  .viewer iframe{flex:1;width:100%;height:100%;border:0;background:#fff}
 
 
   /* ---------- 하단 탭바 (떠 있는 유리 탭바) ---------- */
@@ -299,8 +303,8 @@
 
 <div class="dim" id="dim"></div>
 <div class="viewer" id="viewer">
-  <div class="vbar"><button class="back" id="vBack">‹ APP STORE</button><div class="vt" id="vTitle"></div><a class="ext" id="vExt" target="_blank" rel="noopener">새 창 ↗</a></div>
-  <iframe id="vFrame" title="앱 미리보기" allow="fullscreen; autoplay"></iframe>
+  <div class="vbar"><button class="back" id="vBack">‹ 뒤로</button><div class="vt" id="vTitle"></div><a class="ext" id="vExt" target="_blank" rel="noopener">새 창 ↗</a></div>
+  <div class="vbody"><iframe id="vFrame" title="앱 미리보기" allow="fullscreen; autoplay"></iframe><div class="vedge" id="vEdge"></div></div>
 </div>
 <button class="mbtn off" id="mbtn" hidden aria-label="배경음악 켜기/끄기" title="배경음악">
   <svg viewBox="0 0 32 32"><g class="disc"><circle cx="16" cy="16" r="12" fill="currentColor" opacity=".9"/><circle cx="16" cy="16" r="8.5" fill="none" stroke="var(--bar)" stroke-width=".7" opacity=".6"/><circle cx="16" cy="16" r="4" fill="#1f7ae0"/><circle cx="16" cy="16" r="1.2" fill="var(--bar)"/></g>
@@ -666,15 +670,32 @@ function openViewer(a){
   $('#vTitle').textContent = a.name;
   $('#vExt').href = a.link;
   $('#vFrame').src = a.link;
-  $('#viewer').classList.add('on');
+  const v=$('#viewer'); v.style.transition='none'; v.style.transform='';
+  v.classList.add('on');
   document.body.style.overflow='hidden';
+  try{ history.pushState({showroomViewer:1},''); }catch(e){}
 }
 function closeViewer(){
-  $('#viewer').classList.remove('on');
+  const v=$('#viewer');
+  if(!v.classList.contains('on')) return;
+  v.classList.remove('on'); v.style.transition='none'; v.style.transform='';
   $('#vFrame').src = 'about:blank';
   document.body.style.overflow='';
 }
 document.getElementById('vBack').addEventListener('click', closeViewer);
+/* 휴대폰 뒤로가기(제스처·버튼)로도 닫기 */
+window.addEventListener('popstate', ()=>{ closeViewer(); });
+/* 화면 왼쪽 끝에서 오른쪽으로 밀면 닫기 */
+(function(){
+  const edge=$('#vEdge'), v=$('#viewer'); let x0=null, dx=0;
+  edge.addEventListener('touchstart',e=>{ x0=e.touches[0].clientX; dx=0; v.style.transition='none'; },{passive:true});
+  edge.addEventListener('touchmove',e=>{ if(x0==null) return; dx=Math.max(0,e.touches[0].clientX-x0); v.style.transform=`translateX(${dx}px)`; },{passive:true});
+  const end=()=>{ if(x0==null) return; x0=null;
+    v.style.transition='transform .22s ease-out';
+    if(dx>Math.min(110,innerWidth*.28)){ v.style.transform='translateX(100%)'; setTimeout(closeViewer,220); }
+    else v.style.transform=''; };
+  edge.addEventListener('touchend',end); edge.addEventListener('touchcancel',end);
+})();
 
 (function initMusic(){
   if(!MUSIC.length) return;
