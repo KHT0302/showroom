@@ -367,6 +367,10 @@ const APPS = [
     mode:'get', link:'https://kht0302.github.io/THE-B-FOREST-2026/', users:'', grade:'', devTime:'', shots:[], prompt:'', versions:[] },
   { id:'event',     cat:'school', dev:'kim',  name:'무등산 사제동행 등반 신청', desc:'제1회 봉산중산악회 신청 페이지',
     mode:'get', link:'apps/mudeung-hiking.html', cap:'둘러보기', users:'', grade:'', devTime:'', shots:[], prompt:'', versions:[] },
+  { id:'ticket',    cat:'school', dev:'kim',  name:'축제 티켓 시스템',       desc:'축제 입장 티켓 발급 · 확인',
+    mode:'get', link:'https://pm2026-event-tour.kht920302.chatgpt.site/ticketing', frame:false, users:'', grade:'', devTime:'', shots:[], prompt:'', versions:[] },
+  { id:'reserve',   cat:'school', dev:'kim',  name:'축제 부스 예약',         desc:'케이크·향수·종이접기 체험 부스 사전 예약',
+    mode:'get', link:'https://bongsan-festival-reserve.kht920302.chatgpt.site', frame:false, users:'', grade:'', devTime:'', shots:[], prompt:'', versions:[] },
   { id:'coach',     cat:'school', dev:'kim',  name:'스포츠강사 관리 시스템', desc:'강사 출근·시수·수당 관리',
     mode:'get', link:'', users:'', grade:'', devTime:'', shots:[], prompt:'', versions:[] },
 ];
@@ -430,6 +434,15 @@ const ICON = {
     <path d="M20 40h60" stroke="#fff" stroke-width="5"/>
     <path d="M36 18v14M64 18v14" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
     <path d="M36 58l9 9 18-18" stroke="#5ee38b" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`},
+  ticket:{ bg:'linear-gradient(150deg,#ff3d6e,#ff9a5a)', svg:`
+    <path d="M14 30h72v13a7 7 0 0 0 0 14v13H14V57a7 7 0 0 0 0-14z" fill="#fff"/>
+    <path d="M62 32v36" stroke="#ff5a6a" stroke-width="2.5" stroke-dasharray="3.5 3.5"/>
+    <path d="M38 40l3.5 7 7.5 1-5.5 5.2 1.3 7.6L38 57.2l-6.8 3.6 1.3-7.6-5.5-5.2 7.5-1z" fill="#ff5a6a"/>`},
+  reserve:{ bg:'linear-gradient(150deg,#f59e0b,#fcd34d)', svg:`
+    <rect x="22" y="48" width="56" height="30" rx="6" fill="#fff"/>
+    <path d="M22 58c5 5 9 5 14 0s9-5 14 0 9 5 14 0 9-5 14 0" stroke="#f59e0b" stroke-width="4" fill="none"/>
+    <rect x="47" y="28" width="6" height="18" rx="2" fill="#fff"/>
+    <path d="M50 14c5 6 5 10 0 12-5-2-5-6 0-12z" fill="#fff"/>`},
   upcoming:{ bg:'rgba(255,255,255,.18)', svg:`
     <path d="M50 20c2 14 8 24 22 30-14 6-20 16-22 30-2-14-8-24-22-30 14-6 20-16 22-30z" fill="#fff"/>
     <path d="M76 18c1 6 3 9 8 10-5 1-7 4-8 10-1-6-3-9-8-10 5-1 7-4 8-10z" fill="#fff" opacity=".7"/>`},
